@@ -20,10 +20,15 @@ public class Chap4HandsOn {
     }
 
     public static int partition(int[] nums, int left, int right) {
+
+        // Move all smaller element on the left
+        // Move all larger elements on the right
+        // return the index of the partition which represent the element which is already at the right position
+
         return left;
     }
 
-    public static int swap(int[] nums, int i, int j) {
+    public static void swap(int[] nums, int i, int j) {
         int temp = nums[i];
         nums[i] = nums[j];
         nums[j] = temp;
