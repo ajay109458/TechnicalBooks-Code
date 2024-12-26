@@ -7,6 +7,8 @@ public class Chap8HandsOn {
         validateQuestion1();
         validateQuestion2();
         validateQuestion3();
+        validateQuestion4();
+        validateQuestion5();
     }
 
     public static void validateQuestion1() {
@@ -68,4 +70,99 @@ public class Chap8HandsOn {
 
         System.out.println(result);
     }
+
+    // Job Sequencing Problem
+    public static void validateQuestion4() {
+        Job[] jobs = {
+           new Job(1, 2, 100),
+           new Job(2, 1, 19),
+           new Job(3, 2, 20),
+           new Job(4, 1, 25),
+           new Job(5, 3, 15),
+        };
+
+        int maxDeadline = Arrays.stream(jobs).mapToInt(job -> job.deadline).max().orElse(0);
+
+        jobScheduling(jobs, maxDeadline);
+    }
+
+    public static int jobScheduling(Job[] jobs, int maxDeadline) {
+        Arrays.sort(jobs, Comparator.comparing(a -> a.profit));
+
+        boolean[] slots = new boolean[maxDeadline];
+        int[] result = new int[maxDeadline];
+
+        int totalProfit = 0;
+
+        for (Job job : jobs) {
+            for (int j = Math.min(maxDeadline - 1, job.deadline - 1); j >= 0; j--) {
+                if (!slots[j]) {
+                    slots[j] = true;
+                    result[j] = job.id;
+                    totalProfit += job.profit;
+                    break;
+                }
+            }
+        }
+
+        // Print the selected jobs and the total profit
+        System.out.println("Selected Jobs:");
+        for (int i = 0; i < maxDeadline; i++) {
+            if (slots[i]) {
+                System.out.print("Job " + result[i] + " ");
+            }
+        }
+        System.out.println("\nTotal Profit: " + totalProfit);
+
+        return totalProfit;
+    }
+
+    public static void validateQuestion5() {
+        Graph<Character> graph = new Graph<>(List.of('A', 'B', 'C', 'D'));
+        graph.addEdges('A', Arrays.asList(new Edge<>('B', 2), new Edge<>('C', 3)));
+        graph.addEdges('B', Arrays.asList(new Edge<>('A', 2), new Edge<>('C', 1), new Edge<>('D', 4)));
+        graph.addEdges('C', Arrays.asList(new Edge<>('A', 3), new Edge<>('B', 1), new Edge<>('D', 5)));
+        graph.addEdges('D', Arrays.asList(new Edge<>('B', 4), new Edge<>('C', 5)));
+
+        primMST(graph, 'A');
+    }
+
+    public static void primMST(Graph<Character> graph, Character startNodeName) {
+        PriorityQueue<Edge> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(e -> e.weight));
+        Set<Character> visited = new HashSet<>();
+        List<Character> mstEdges = new ArrayList<>();
+
+        visited.add(startNodeName);
+
+        for(Edge edge : graph.getNeighborsWithWeight(startNodeName)) {
+            priorityQueue.offer(edge);
+        }
+
+        int totalWeight = 0;
+
+        while(!priorityQueue.isEmpty()) {
+            Edge<Character> currentEdge = priorityQueue.poll();
+
+            if (visited.contains(currentEdge.targetNode)) {
+                continue;
+            }
+
+            // Add the edge to the MST
+            visited.add(currentEdge.targetNode);
+            mstEdges.add(currentEdge.targetNode);
+            totalWeight += currentEdge.weight;
+
+            // Add all neighbours
+            for(Edge edge : graph.getNeighborsWithWeight(currentEdge.targetNode)) {
+                if (!visited.contains(edge.targetNode)) {
+                    priorityQueue.offer(edge);
+                }
+            }
+        }
+
+        System.out.println("Minimum Spanning Tree: " + mstEdges);
+        System.out.println("Total Weight: " + totalWeight);
+    }
+
+
 }
