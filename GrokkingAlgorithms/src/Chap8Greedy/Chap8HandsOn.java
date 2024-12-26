@@ -9,6 +9,11 @@ public class Chap8HandsOn {
         validateQuestion3();
         validateQuestion4();
         validateQuestion5();
+        validateQuestion6();
+        validateQuestion7();
+        validateQuestion8();
+        validateQuestion9();
+        validateQuestion10();
     }
 
     public static void validateQuestion1() {
@@ -71,8 +76,50 @@ public class Chap8HandsOn {
         System.out.println(result);
     }
 
-    // Job Sequencing Problem
+
+    // Huffman Encoding
     public static void validateQuestion4() {
+        Map<Character, Integer> frequencies = new HashMap<>();
+        frequencies.put('A', 5);
+        frequencies.put('B', 9);
+        frequencies.put('C', 12);
+        frequencies.put('D', 13);
+        frequencies.put('E', 16);
+        frequencies.put('F', 45);
+
+        Map<Character, String> result = huffmanEncoding(frequencies);
+        // Display the Huffman codes
+        System.out.println("Huffman Codes:");
+        for (Map.Entry<Character, String> entry : result.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+    }
+
+    public static Map<Character, String> huffmanEncoding(Map<Character, Integer> frequencies) {
+        PriorityQueue<HuffmanNode> pq = new PriorityQueue<>(new HuffmanEncoding.NodeComparator());
+
+        for (Map.Entry<Character, Integer> entry: frequencies.entrySet()) {
+            pq.add(new HuffmanNode(entry.getKey(), entry.getValue()));
+        }
+
+        while (pq.size() > 1) {
+            HuffmanNode left = pq.poll();
+            HuffmanNode right = pq.poll();
+
+            HuffmanNode newNode = new HuffmanNode('-', left.freq + right.freq);
+            newNode.left = left;
+            newNode.right = right;
+
+            pq.add(newNode);
+        }
+
+        HuffmanNode root = pq.poll();
+        Map<Character, String> result = HuffmanEncoding.generateHuffmanCodes(root);
+        return result;
+    }
+
+    // Job Sequencing Problem
+    public static void validateQuestion5() {
         Job[] jobs = {
            new Job(1, 2, 100),
            new Job(2, 1, 19),
@@ -117,7 +164,7 @@ public class Chap8HandsOn {
         return totalProfit;
     }
 
-    public static void validateQuestion5() {
+    public static void validateQuestion6() {
         Graph<Character> graph = new Graph<>(List.of('A', 'B', 'C', 'D'));
         graph.addEdges('A', Arrays.asList(new Edge<>('B', 2), new Edge<>('C', 3)));
         graph.addEdges('B', Arrays.asList(new Edge<>('A', 2), new Edge<>('C', 1), new Edge<>('D', 4)));
@@ -164,5 +211,115 @@ public class Chap8HandsOn {
         System.out.println("Total Weight: " + totalWeight);
     }
 
+    public static List<Edge> kruskalMST(List<Edge> edges, Set<Character> nodes) {
+        List<Edge> mstEdges = new ArrayList<>();
+        UnionFind uf = new UnionFind();
 
+        for(Character node: nodes) {
+            uf.makeSet(node);
+        }
+
+        edges.sort(Comparator.comparingInt(edge -> edge.weight));
+
+        for(Edge<Character> edge : edges) {
+            if (uf.union(edge.srcNode, edge.targetNode)) {
+                mstEdges.add(edge);
+            }
+        }
+
+        return mstEdges;
+    }
+
+    public static void validateQuestion7() {
+        Graph<Character> graph = new Graph<>(List.of('A', 'B', 'C', 'D'));
+        graph.addEdge('A', 'B', 4);
+        graph.addEdge('A', 'C', 3);
+        graph.addEdge('B', 'D', 2);
+        graph.addEdge('C', 'D', 1);
+
+
+    }
+
+    public static void validateQuestion8() {
+        Graph<Character> graph = new Graph<>(List.of('A', 'B', 'C', 'D', 'E'));
+        graph.addEdges('A', Arrays.asList(new Edge<>('B'), new Edge<>('C')));
+        graph.addEdges('B', Arrays.asList(new Edge<>('A'), new Edge<>('C')));
+        graph.addEdges('C', Arrays.asList(new Edge<>('A'), new Edge<>('B'), new Edge<>('D')));
+        graph.addEdges('D', Arrays.asList(new Edge<>('C'), new Edge<>('E')));
+        graph.addEdges('E', Arrays.asList(new Edge<>('D')));
+
+        Map<Character, Integer> colorAssignment = greedyColoring(graph);
+
+        // Display results
+        System.out.println("Vertex Coloring:");
+        for (Map.Entry<Character, Integer> entry : colorAssignment.entrySet()) {
+            System.out.println("Vertex " + entry.getKey() + ": Color " + entry.getValue());
+        }
+
+        // Calculate and display the total number of colors used
+        int numColors = new HashSet<>(colorAssignment.values()).size();
+        System.out.println("Total Colors Used: " + numColors);
+    }
+
+    private static Map<Character, Integer> greedyColoring(Graph<Character> graph) {
+        Map<Character, Integer> colorAssignment = new HashMap<>();
+
+        for(Character nodeName : graph.getNodes()) {
+            Set<Integer> adjacentColors = new HashSet<>();
+            for(Edge<Character> edge: graph.getNeighborsWithWeight(nodeName)) {
+                Character neighbour = edge.targetNode;
+                if (colorAssignment.containsKey(neighbour)) {
+                    adjacentColors.add(colorAssignment.get(neighbour));
+                }
+            }
+
+            int color = 0;
+            while(adjacentColors.contains(color)) {
+                color++;
+            }
+
+            colorAssignment.put(nodeName, color);
+        }
+
+        return colorAssignment;
+    }
+
+    public static void validateQuestion9() {
+        int[] dominations = {1, 2, 5, 10};
+        int amount = 17;
+
+        int dominationIndex = dominations.length - 1;
+        int coinCount = 0;
+        while(amount > 0 && dominationIndex >= 0) {
+            if (amount >= dominations[dominationIndex]) {
+                coinCount += amount/dominations[dominationIndex];
+                amount = amount % dominations[dominationIndex];
+            } else {
+                dominationIndex--;
+            }
+        }
+
+        if (amount == 0) {
+            System.out.println("Coin counts: " + coinCount);
+        } else {
+            System.out.println("Coin amount is not possible with given dominations");
+        }
+    }
+
+    public static void validateQuestion10() {
+        Map<Character, Integer> frequencies = new HashMap<>();
+        frequencies.put('A', 5);
+        frequencies.put('B', 9);
+        frequencies.put('C', 12);
+        frequencies.put('D', 13);
+        frequencies.put('E', 16);
+        frequencies.put('F', 45);
+
+        Map<Character, String> result = huffmanEncoding(frequencies);
+        // Display the Huffman codes
+        System.out.println("Huffman Codes:");
+        for (Map.Entry<Character, String> entry : result.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+    }
 }
